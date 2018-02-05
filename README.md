@@ -1,11 +1,15 @@
-# Getting Started with Python
+# Getting Started with PyQlik / CDSW
 
-This baseline project shows how to get the most out of [Python](http://ipython.org) 
-on Cloudera Data Science Workbench. To begin, open the project workbench.
+This baseline project shows how to use Python to connect to the Qlik Sense QIX Engine API from within a Cloudera Data Science Workbench environment.
 
 ## Files
 
 Modify the default files to get started with your own project.
 
-* `README.md` -- This project's readme in Markdown format.
-* `analysis.py` -- An example Python analysis script.
+* `TestPyQlik` -- Script to execute example methods against the cloudera.qlik.com Qlik Sense demo server
+* `pyqlikengine` -- Folder containing the python module code for interacting with the Qlik Sense QIX engine. It is maintained here: https://github.com/qliknln/pyqlikengine
+
+## How to get it going
+
+* `Login` -- Visit http://cdsw.cloudera.qlik.com and if you don't already have an account on this server, click `"Sign Up for a New Account"`. If you already have an account then log in
+* Create a New Project
