@@ -15,7 +15,7 @@ Modify the default files to get started with your own project.
 * Create a New Project -- Click blue button "New Project" on the upper right section of the page after logging in
 * Give the project a name, click Git in the "Initial Setup" area, and paste the URL of this GitHub repository (https://github.com/Qlik-PE/CDSW_QlikSense.git) and click Create Project
 * You will now see the project workspace. Initially you will see a list of files, some workspace areas on the left, and a button on the top right that reads "Open Workbench". Click that button, "Open Workbench" 
-* You will be asked which Engine Kernel you want to use, click "Python 2", leave the rest defaults, and click Launch Session. This will start up a docker instance to do your work in.
+* You will be asked which Engine Kernel you want to use, click "Python 2", leave the rest defaults, and click Launch Session. This will start up a docker instance to do your work in. Once started, click "Open in Workbench"
+* Upon entering the workbench, the first thing you will need to do is install the required packages. Click on "Terminal access" on the top right and run the following command "pip install -r requirements.txt"
 * When the session has started, it will take you into the workbench interface to run code. On the left, you will see the files imported from GitHub. Click on the file "TestPyQlik.py"
-* Code will be displayed, and you will have an option to run the code.. On the menu bar just above the code, click on the black play symbol to run all of the code
-
+* Code will be displayed, and you will have an option to run the code.. On the menu bar just above the code, click on the black play symbol to run all of the code at one time. If you want to simply run sections of the code, you can select a section, right click, and choose "Run Line(s)"
