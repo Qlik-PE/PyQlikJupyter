@@ -1,27 +1,3 @@
-#import pip
-#
-#def install(package):
-#    pip.main(['install', package])
-#
-## Example
-#if __name__ == '__main__':
-#    install('websocket-client')
-
-#def install(package):
-#    pip.main(['install', package])
-#
-## Example
-#if __name__ == '__main__':
-#    install('websocket')
-
-#def install(package):
-#    pip.main(['install', package])
-#
-## Example
-#if __name__ == '__main__':
-#    install('PyJWT')
-
-
 from pyqlikengine.engine_communicator import EngineCommunicator
 from pyqlikengine.engine_global_api import EngineGlobalApi
 from pyqlikengine.engine_app_api import EngineAppApi
@@ -83,5 +59,4 @@ for elem in range(len(elems)):
 
 conn.close_qvengine_connection(conn)
 print(dim_list)
-print(mes_list
-      
+print(mes_list)
