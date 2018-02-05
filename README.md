@@ -11,5 +11,5 @@ Modify the default files to get started with your own project.
 
 ## How to get it going
 
-* `Login` -- Visit http://cdsw.cloudera.qlik.com and if you don't already have an account on this server, click `"Sign Up for a New Account"`. If you already have an account then log in
+* `Login` -- Visit http://cdsw.cloudera.qlik.com and if you don't already have an account on this server, click "Sign Up for a New Account". If you already have an account then log in
 * Create a New Project
