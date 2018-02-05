@@ -28,7 +28,7 @@ class SecureEngineCommunicator(EngineCommunicator):
             sslOpts = {"cert_reqs": ssl.CERT_NONE}
         
         privateKey = open(privateKeyPath).read()
-        token = jwt.encode({'user': userId, 'directory': userDirectory}, privateKey, algorithm='RS256')
+        token = jwt.encode({'userId': userId, 'userDirectory': userDirectory}, privateKey, algorithm='RS256')
 
         self.ws = create_connection(self.url, sslopt=sslOpts, header=['Authorization: BEARER ' + str(token)])
         self.session = self.ws.recv()

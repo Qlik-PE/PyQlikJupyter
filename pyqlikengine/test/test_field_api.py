@@ -1,12 +1,10 @@
-import unittest
-
-from engine_app_api import EngineAppApi
 from engine_communicator import EngineCommunicator
-from engine_field_api import EngineFieldApi
 from engine_global_api import EngineGlobalApi
-from structs import Structs
-
+from engine_app_api import EngineAppApi
 from engine_generic_object_api import EngineGenericObjectApi
+from engine_field_api import EngineFieldApi
+from structs import Structs
+import unittest
 
 
 class TestFieldApi(unittest.TestCase):
@@ -20,8 +18,8 @@ class TestFieldApi(unittest.TestCase):
         self.efa = EngineFieldApi(self.conn)
         self.struct = Structs()
         self.app = self.ega.create_app("TestApp")
-        opened_app = self.ega.open_doc(self.app['qAppId'])
-        self.app_handle = self.ega.get_handle(opened_app['qReturn'])
+        opened_app = self.ega.open_doc(self.app)
+        self.app_handle = self.ega.get_handle(opened_app)
         script = file('./test/test_data/ctrl00_script.qvs').read()
         self.eaa.set_script(self.app_handle, script)
         self.eaa.do_reload_ex(self.app_handle)

@@ -1,12 +1,10 @@
-import unittest
-
-from engine_app_api import EngineAppApi
 from engine_communicator import EngineCommunicator
-from engine_field_api import EngineFieldApi
 from engine_global_api import EngineGlobalApi
-from structs import Structs
-
+from engine_app_api import EngineAppApi
 from engine_generic_object_api import EngineGenericObjectApi
+from engine_field_api import EngineFieldApi
+from structs import Structs
+import unittest
 
 
 class TestAppApi(unittest.TestCase):
@@ -20,9 +18,9 @@ class TestAppApi(unittest.TestCase):
         self.egoa = EngineGenericObjectApi(self.conn)
         self.efa = EngineFieldApi(self.conn)
         self.struct = Structs()
-        self.app = self.ega.create_app("TestApp")['qAppId']
+        self.app = self.ega.create_app("TestApp")
         opened_app = self.ega.open_doc(self.app)
-        self.app_handle = self.ega.get_handle(opened_app['qReturn'])
+        self.app_handle = self.ega.get_handle(opened_app)
 
     def test_add_alternate_state(self):
         response = self.eaa.add_alternate_state(self.app_handle,"MyState")
