@@ -12,4 +12,5 @@ Modify the default files to get started with your own project.
 ## How to get it going
 
 * `Login` -- Visit http://cdsw.cloudera.qlik.com and if you don't already have an account on this server, click "Sign Up for a New Account". If you already have an account then log in
-* Create a New Project
+* Create a New Project -- Click blue button "New Project" on the upper right section of the page after logging in
+** Click Git and paste the URL of this GitHub repository
