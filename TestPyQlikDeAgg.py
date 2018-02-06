@@ -6,7 +6,7 @@ from pyqlikengine.engine_communicator import SecureEngineCommunicator
 host = "cloudera.qlik.com"
 proxyPrefix = "jupyter"
 userDirectory = "CLOUDERA"
-userId = "user_1"
+userId = "chris"
 privateKey = "./private.key"
 conn = SecureEngineCommunicator(host, proxyPrefix, userDirectory, userId, privateKey)
 ega = EngineGlobalApi(conn)
@@ -43,12 +43,12 @@ hc_inline_dim = Structs.nx_inline_dimension_def(["Customer","Order Number"])
 hc_mes_sort = Structs.nx_sort_by()
 
 ### Define Measure of hypercube
-hc_inline_mes = Structs.nx_inline_measure_def(["=Sum([Sales Amount])", "=Avg([Sales Amount])"])
+hc_inline_mes = Structs.nx_inline_measure_def(["=Sum([Sales Amount])", "=Sum([Sales Quantity])"])
 
 ### Build hypercube from above definition
 hc_dim = Structs.nx_hypercube_dimensions(hc_inline_dim)
 hc_mes = Structs.nx_hypercube_measure(hc_mes_sort, hc_inline_mes)
-nx_page = Structs.nx_page(0, 0, 100, 3)
+nx_page = Structs.nx_page(0, 0, 2500, 4)
 hc_def = Structs.hypercube_def("$", hc_dim, hc_mes, [nx_page])
 hc_response = eaa.create_object(app_handle, "CH01", "Chart", "qHyperCubeDef", hc_def)
 hc_handle = ega.get_handle(hc_response)
@@ -64,6 +64,7 @@ fld_handle = ega.get_handle(lb_field)
 ### Set values to select in chosen field above
 values_to_select = [{'qText': 'Fins'}, {'qText': 'Bizmarts'}, {'qText': 'Benedict'}, {'qText': 'Earth'}, {'qText': 'Gate'}]
 sel_res = efa.select_values(fld_handle,values_to_select)
+#desel_res = eaa.clear_all(app_handle);
 
 ### Retrieve newly selected data in hypercube
 hc_data = egoa.get_hypercube_data(hc_handle, "/qHyperCubeDef", [nx_page])
@@ -72,22 +73,28 @@ elems = hc_data["qDataPages"][0]['qMatrix']
 
 print elems
 
-dim_list = []
-mes_list = []
+dim1_list = []
+dim2_list = []
+mes1_list = []
+mes2_list = []
 
 for elem in range(len(elems)):
-    dim_list.append(elems[elem][0]["qText"])
-    mes_list.append(elems[elem][1]["qNum"])
+    dim1_list.append(elems[elem][0]["qText"])
+    dim2_list.append(elems[elem][1]["qText"])
+    mes1_list.append(elems[elem][2]["qNum"])
+    mes2_list.append(elems[elem][3]["qNum"])
 
 ### Close connection
-conn.close_qvengine_connection(conn)
+#conn.close_qvengine_connection(conn)
 
 
-### Print dimension list
-print(dim_list)
+### Print dimension lists
+print(dim1_list)
+print(dim2_list)
 
-### Print measure list
-print(mes_list)
+### Print measure lists
+print(mes1_list)
+print(mes2_list)
 
 ############ VISUALIZE #############
 
@@ -98,20 +105,16 @@ import pandas as pd
 import seaborn as sns
 
 ### Load data
-d = {'customer':dim_list, 'sales':mes_list} 
+d = {'customer':dim1_list, 'orders':dim2_list, 'sales':mes1_list, 'qty':mes2_list} 
 df = pd.DataFrame(d)
 
+
 ### Set up a factorplot
-g = sns.factorplot("Customer", "Sales Amt", dim_list, mes_list, data=df, kind="bar", palette="muted", legend=False)
+#g = sns.factorplot(dim1_list, mes1_list, data=df, kind="bar", palette="muted", legend=False)
 
 ### Try a StripPlot
 sns.stripplot(x='customer', y='sales', data=df);
 
-#import matplotlib.pyplot as plt
-#
-#dims=['a','b','c','d','e']
-#meas=[1,2,3,4,5]
-#
-#plt.bar(range(len(dims)), meas)
-#plt.xticks(range(len(dims)), dims)
-#plt.show()
+sns.set(style="whitegrid")
+
+sns.barplot(x=df.customer, y=df.sales, data=df.customer.reset_index())
