@@ -13,11 +13,6 @@ userId = "user_1"
 privateKey = "./private.key"
 
 conn = SecureEngineCommunicator(host, proxyPrefix, userDirectory, userId, privateKey)
-conn.ws.recv()
-ega = EngineGlobalApi(conn)
-
-# eaa = EngineAppApi(conn)
-
 import pyqlikengine.engine_communicator
 import pyqlikengine.engine_global_api
 import pyqlikengine.engine_app_api
