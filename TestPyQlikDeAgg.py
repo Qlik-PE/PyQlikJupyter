@@ -6,7 +6,7 @@ from pyqlikengine.engine_communicator import SecureEngineCommunicator
 host = "cloudera.qlik.com"
 proxyPrefix = "jupyter"
 userDirectory = "CLOUDERA"
-userId = "chris"
+userId = "user_1"
 privateKey = "./private.key"
 conn = SecureEngineCommunicator(host, proxyPrefix, userDirectory, userId, privateKey)
 ega = EngineGlobalApi(conn)
@@ -118,3 +118,18 @@ sns.stripplot(x='customer', y='sales', data=df);
 sns.set(style="whitegrid")
 
 sns.barplot(x=df.customer, y=df.sales, data=df.customer.reset_index())
+
+data = np.random.multivariate_normal([0, 0], [[5, 2], [2, 2]], size=2000)
+data = pd.DataFrame(data, columns=['x', 'y'])
+
+### Distribution Plot of Sales/Qty
+sns.distplot(df['sales'])
+sns.distplot(df['qty'])
+    
+### KDE Histogram of Sales
+for col in 'xy':
+    sns.kdeplot(df['sales'], shade=True)
+    
+### Jointplot of sales/qty
+with sns.axes_style('white'):
+    sns.jointplot("sales", "qty", df, kind='kde');
