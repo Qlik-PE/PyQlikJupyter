@@ -146,13 +146,6 @@ with sns.axes_style('white'):
 
 ### Another Jointplot
 sns.jointplot(data=df, x='sales', y='qty', kind='reg', color='g')
-
-### Large Distributions
-networks = sns.load_dataset(df, index_col=0, header=[0, 1, 2])
-networks = df.T.groupby(level="customer").mean().T
-order = networks.std().sort_values().index
-
-sns.lvplot(data=networks, order=order, scale="linear", palette="mako")
     
 ### Violin Plot
 sns.violinplot([df.sales, df.qty])
