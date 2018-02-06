@@ -78,8 +78,37 @@ for elem in range(len(elems)):
 ### Close connection
 conn.close_qvengine_connection(conn)
 
+
+
 ### Print dimension list
 print(dim_list)
 
 ### Print measure list
 print(mes_list)
+
+############ VISUALIZE #############
+
+### Import necessarily libraries
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
+
+### Load data
+d = {'customer':dim_list, 'sales':mes_list} 
+df = pd.DataFrame(d)
+
+### Set up a factorplot
+#g = sns.factorplot(dim_list, mes_list, dim_list, data=df, kind="bar", palette="muted", legend=False)
+
+### Try a StripPlot
+sns.stripplot(x='customer', y='sales', data=df);
+
+#import matplotlib.pyplot as plt
+#
+#dims=['a','b','c','d','e']
+#meas=[1,2,3,4,5]
+#
+#plt.bar(range(len(dims)), meas)
+#plt.xticks(range(len(dims)), dims)
+#plt.show()
