@@ -67,7 +67,7 @@ class Structs:
     @staticmethod
     def nx_hypercube_measure(sort_by={}, nx_inline_measures_defs=[]):
         qMeasures = []
-        for nx_inline_measures_def in inline_measures_defs:
+        for nx_inline_measures_def in nx_inline_measures_defs:
           qMeasures.append({"qSortBy": sort_by,
                 "qDef": nx_inline_measures_def
                 })
@@ -78,10 +78,10 @@ class Structs:
         inlineMeas = []
         for definition in definitions:
           inlineMeas.append({"qLabel": label,
-                "qDescription":	description,
+                "qDescription": description,
                 "qTags": tags,
                 "qGrouping": grouping,
-                "qDef":	definition
+                "qDef": definition
                 })
         return inlineMeas
 
