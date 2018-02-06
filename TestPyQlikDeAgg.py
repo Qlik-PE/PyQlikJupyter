@@ -37,7 +37,7 @@ opened_app = ega.open_doc('8921dfe7-f46c-437c-bdb3-eb16c768793f') ##Executive Da
 app_handle = ega.get_handle(opened_app)
 
 ### Define Dimensions of hypercube
-hc_inline_dim = Structs.nx_inline_dimension_def(["Customer","Order Number]"])
+hc_inline_dim = Structs.nx_inline_dimension_def(["Customer","Order Number"])
 
 ### Set sorting of Dimension by Measure
 hc_mes_sort = Structs.nx_sort_by()
@@ -48,8 +48,8 @@ hc_inline_mes = Structs.nx_inline_measure_def("=Sum([Sales Amount])")
 ### Build hypercube from above definition
 hc_dim = Structs.nx_hypercube_dimensions(hc_inline_dim)
 hc_mes = Structs.nx_hypercube_measure(hc_mes_sort, hc_inline_mes)
-nx_page = Structs.nx_page(0, 0, 100, 2)
-hc_def = Structs.hypercube_def("$", [hc_dim],[hc_mes], [nx_page])
+nx_page = Structs.nx_page(0, 0, 100, 3)
+hc_def = Structs.hypercube_def("$", hc_dim,[hc_mes], [nx_page])
 hc_response = eaa.create_object(app_handle, "CH01", "Chart", "qHyperCubeDef", hc_def)
 hc_handle = ega.get_handle(hc_response)
 print hc_response
