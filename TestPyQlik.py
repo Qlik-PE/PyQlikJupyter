@@ -37,7 +37,7 @@ opened_app = ega.open_doc('8921dfe7-f46c-437c-bdb3-eb16c768793f') ##Executive Da
 app_handle = ega.get_handle(opened_app)
 
 ### Define Dimension of hypercube
-hc_inline_dim = Structs.nx_inline_dimension_def(["Customer"])
+hc_inline_dim = Structs.nx_inline_dimension_def(["Order Number"])
 
 ### Set sorting of Dimension by Measure
 hc_mes_sort = Structs.nx_sort_by()
@@ -95,20 +95,11 @@ import pandas as pd
 import seaborn as sns
 
 ### Load data
-d = {'customer':dim_list, 'sales':mes_list} 
+d = {'orders':dim_list, 'sales':mes_list} 
 df = pd.DataFrame(d)
 
 ### Set up a factorplot
-#g = sns.factorplot(dim_list, mes_list, dim_list, data=df, kind="bar", palette="muted", legend=False)
+#g = sns.factorplot(dim_list, mes_list,  data=df, kind="bar", palette="muted", legend=False)
 
 ### Try a StripPlot
-sns.stripplot(x='customer', y='sales', data=df);
-
-#import matplotlib.pyplot as plt
-#
-#dims=['a','b','c','d','e']
-#meas=[1,2,3,4,5]
-#
-#plt.bar(range(len(dims)), meas)
-#plt.xticks(range(len(dims)), dims)
-#plt.show()
+sns.stripplot(x='orders', y='sales', data=df);
