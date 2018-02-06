@@ -2,6 +2,7 @@ from pyqlikengine.engine_communicator import EngineCommunicator
 from pyqlikengine.engine_global_api import EngineGlobalApi
 from pyqlikengine.engine_app_api import EngineAppApi
 from pyqlikengine.engine_communicator import SecureEngineCommunicator
+from pyqlikengine.engine_field_api import EngineFieldApi
 
 host = "cloudera.qlik.com"
 proxyPrefix = "jupyter"
@@ -12,22 +13,6 @@ privateKey = "./private.key"
 conn = SecureEngineCommunicator(host, proxyPrefix, userDirectory, userId, privateKey)
 conn.ws.recv()
 ega = EngineGlobalApi(conn)
-
-# eaa = EngineAppApi(conn)
-
-import pyqlikengine.engine_communicator
-import pyqlikengine.engine_global_api
-import pyqlikengine.engine_app_api
-from pyqlikengine.engine_generic_object_api import EngineGenericObjectApi
-import pyqlikengine.engine_field_api
-import pyqlikengine.structs
-conn = SecureEngineCommunicator(host, proxyPrefix, userDirectory, userId, privateKey)
-efa = pyqlikengine.engine_field_api.EngineFieldApi(conn)
-Structs = pyqlikengine.structs.Structs()
-egoa = pyqlikengine.engine_generic_object_api.EngineGenericObjectApi(conn)
-ega = EngineGlobalApi(conn)
-eaa = EngineAppApi(conn)
-conn.ws.recv()
 
 apps = ega.get_doc_list()
 ### List Apps available (identify the App GUID to open)
@@ -42,7 +27,9 @@ from pyqlikengine import engine_helper as pyqlikhelper
 
 dimensions = ["Customer","Order Number"]
 measures = ["=Sum([Sales Amount])", "=Avg([Sales Amount])"]
-df = pyqlikhelper.getDataFrame(conn, app_handle, measures, dimensions)
+selections = {"Customer": ["Sigma"]}
+df = pyqlikhelper.getDataFrame(conn, app_handle, measures, dimensions, selections)
+conn.close_qvengine_connection(conn)
 
 ############ VISUALIZE #############
 
