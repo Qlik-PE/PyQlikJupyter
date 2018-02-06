@@ -6,7 +6,7 @@ from pyqlikengine.engine_communicator import SecureEngineCommunicator
 host = "cloudera.qlik.com"
 proxyPrefix = "jupyter"
 userDirectory = "CLOUDERA"
-userId = "chris"
+userId = "user_1"
 privateKey = "./private.key"
 conn = SecureEngineCommunicator(host, proxyPrefix, userDirectory, userId, privateKey)
 ega = EngineGlobalApi(conn)
