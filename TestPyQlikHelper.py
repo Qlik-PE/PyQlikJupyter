@@ -42,7 +42,7 @@ from pyqlikengine import engine_helper as pyqlikhelper
 
 dimensions = ["Customer","Order Number"]
 measures = ["=Sum([Sales Amount])", "=Avg([Sales Amount])"]
-df = pyqlikhelper.getDataFrame(conn, app_handle, dimensions, measures)
+df = pyqlikhelper.getDataFrame(conn, app_handle, measures, dimensions)
 
 ############ VISUALIZE #############
 

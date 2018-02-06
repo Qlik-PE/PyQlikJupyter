@@ -8,13 +8,13 @@ import pandas as pd
 def getDataFrame(connection, appHandle, measures, dimensions, selections=[]):
     engineGlobalApi = EngineGlobalApi(connection)
     ### Define Dimensions of hypercube
-    hc_inline_dim = Structs.nx_inline_dimension_def(measures)
+    hc_inline_dim = Structs.nx_inline_dimension_def(dimensions)
 
     ### Set sorting of Dimension by Measure
     hc_mes_sort = Structs.nx_sort_by()
 
     ### Define Measure of hypercube
-    hc_inline_mes = Structs.nx_inline_measure_def(dimensions)
+    hc_inline_mes = Structs.nx_inline_measure_def(measures)
 
     ### Build hypercube from above definition
     hc_dim = Structs.nx_hypercube_dimensions(hc_inline_dim)
@@ -30,8 +30,6 @@ def getDataFrame(connection, appHandle, measures, dimensions, selections=[]):
     hc_handle = engineGlobalApi.get_handle(hc_response)
 
     engineGenericObjectApi = EngineGenericObjectApi(connection)
-    ### Get contents of the hypercube
-    engineGenericObjectApi.get_layout(hc_handle)
 
     i = 0
     while i % height == 0:
