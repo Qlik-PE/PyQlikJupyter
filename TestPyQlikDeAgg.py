@@ -82,7 +82,7 @@ for elem in range(len(elems)):
     dim1_list.append(elems[elem][0]["qText"])
     dim2_list.append(elems[elem][1]["qText"])
     mes1_list.append(elems[elem][2]["qNum"])
-    mes2_list.append(elems[elem][3]["qNum"])
+    mes2_list.append(int(elems[elem][3]["qNum"]))
 
 ### Close connection
 #conn.close_qvengine_connection(conn)
@@ -108,6 +108,8 @@ import seaborn as sns
 d = {'customer':dim1_list, 'orders':dim2_list, 'sales':mes1_list, 'qty':mes2_list} 
 df = pd.DataFrame(d)
 
+d1 = {'sales':mes1_list, 'qty':mes2_list}
+df1 = pd.DataFrame(d1)
 
 ### Set up a factorplot
 #g = sns.factorplot(dim1_list, mes1_list, data=df, kind="bar", palette="muted", legend=False)
@@ -115,12 +117,17 @@ df = pd.DataFrame(d)
 ### Try a StripPlot
 sns.stripplot(x='customer', y='sales', data=df);
 
+### Try a Scatterplot
+sns.lmplot('sales', 'qty', data=df, fit_reg=False)
+
 sns.set(style="whitegrid")
 
+### Simple Bar Plot
 sns.barplot(x=df.customer, y=df.sales, data=df.customer.reset_index())
 
-data = np.random.multivariate_normal([0, 0], [[5, 2], [2, 2]], size=2000)
-data = pd.DataFrame(data, columns=['x', 'y'])
+### KDE Plot
+sns.kdeplot(df.sales, df.qty)
+
 
 ### Distribution Plot of Sales/Qty
 sns.distplot(df['sales'])
@@ -133,3 +140,13 @@ for col in 'xy':
 ### Jointplot of sales/qty
 with sns.axes_style('white'):
     sns.jointplot("sales", "qty", df, kind='kde');
+    
+### Violin Plot
+sns.violinplot([df.sales, df.qty])
+
+
+### Cluster Map of just sales/qty
+sns.clustermap(df1)
+
+### Heat Map of just sales/qty
+sns.heatmap([df1.sales, df1.qty], annot=True, fmt="f")
