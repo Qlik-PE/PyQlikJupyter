@@ -78,10 +78,10 @@ class Structs:
         inlineMeas = []
         for definition in definitions:
           inlineMeas.append({"qLabel": label,
-                "qDescription":	description,
+                "qDescription": description,
                 "qTags": tags,
                 "qGrouping": grouping,
-                "qDef":	definition
+                "qDef": definition
                 })
         return inlineMeas
 
