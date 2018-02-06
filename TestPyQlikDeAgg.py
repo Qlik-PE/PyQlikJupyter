@@ -108,11 +108,14 @@ import seaborn as sns
 d = {'customer':dim1_list, 'orders':dim2_list, 'sales':mes1_list, 'qty':mes2_list} 
 df = pd.DataFrame(d)
 
+## Inspect data frame
+df
+
 d1 = {'sales':mes1_list, 'qty':mes2_list}
 df1 = pd.DataFrame(d1)
 
 ### Set up a factorplot
-#g = sns.factorplot(dim1_list, mes1_list, data=df, kind="bar", palette="muted", legend=False)
+sns.factorplot(x='orders', y='sales', hue='customer', data=df, scale = .5, markers=['o', 'v'])
 
 ### Try a StripPlot
 sns.stripplot(x='customer', y='sales', data=df);
@@ -125,9 +128,10 @@ sns.set(style="whitegrid")
 ### Simple Bar Plot
 sns.barplot(x=df.customer, y=df.sales, data=df.customer.reset_index())
 
+
+
 ### KDE Plot
 sns.kdeplot(df.sales, df.qty)
-
 
 ### Distribution Plot of Sales/Qty
 sns.distplot(df['sales'])
@@ -140,6 +144,16 @@ for col in 'xy':
 ### Jointplot of sales/qty
 with sns.axes_style('white'):
     sns.jointplot("sales", "qty", df, kind='kde');
+
+### Another Jointplot
+sns.jointplot(data=df, x='sales', y='qty', kind='reg', color='g')
+
+### Large Distributions
+networks = sns.load_dataset(df, index_col=0, header=[0, 1, 2])
+networks = df.T.groupby(level="customer").mean().T
+order = networks.std().sort_values().index
+
+sns.lvplot(data=networks, order=order, scale="linear", palette="mako")
     
 ### Violin Plot
 sns.violinplot([df.sales, df.qty])
@@ -150,3 +164,6 @@ sns.clustermap(df1)
 
 ### Heat Map of just sales/qty
 sns.heatmap([df1.sales, df1.qty], annot=True, fmt="f")
+
+### BoxPlot
+sns.boxplot([df.sales, df.qty])
