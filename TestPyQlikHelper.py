@@ -1,3 +1,6 @@
+### Install dependencies (Run first time project started)
+# !pip install -r requirement.txt
+
 from pyqlikengine.engine_communicator import EngineCommunicator
 from pyqlikengine.engine_global_api import EngineGlobalApi
 from pyqlikengine.engine_app_api import EngineAppApi
