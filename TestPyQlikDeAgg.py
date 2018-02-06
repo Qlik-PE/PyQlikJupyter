@@ -1,8 +1,16 @@
+### Import Libraries
 from pyqlikengine.engine_communicator import EngineCommunicator
 from pyqlikengine.engine_global_api import EngineGlobalApi
 from pyqlikengine.engine_app_api import EngineAppApi
 from pyqlikengine.engine_communicator import SecureEngineCommunicator
+import pyqlikengine.engine_communicator
+import pyqlikengine.engine_global_api
+import pyqlikengine.engine_app_api
+import pyqlikengine.engine_generic_object_api
+import pyqlikengine.engine_field_api
+import pyqlikengine.structs
 
+### Set Qlik Sense Server Connection Parameters
 host = "cloudera.qlik.com"
 proxyPrefix = "jupyter"
 userDirectory = "CLOUDERA"
@@ -13,12 +21,7 @@ ega = EngineGlobalApi(conn)
 eaa = EngineAppApi(conn)
 conn.ws.recv()
 
-import pyqlikengine.engine_communicator
-import pyqlikengine.engine_global_api
-import pyqlikengine.engine_app_api
-import pyqlikengine.engine_generic_object_api
-import pyqlikengine.engine_field_api
-import pyqlikengine.structs
+### Set up variables to user later
 conn = SecureEngineCommunicator(host, proxyPrefix, userDirectory, userId, privateKey)
 efa = pyqlikengine.engine_field_api.EngineFieldApi(conn)
 Structs = pyqlikengine.structs.Structs()
@@ -27,12 +30,14 @@ ega = EngineGlobalApi(conn)
 eaa = EngineAppApi(conn)
 conn.ws.recv()
 
-apps = ega.get_doc_list()
 
 ### List Apps available (identify the App GUID to open)
+apps = ega.get_doc_list()
 for app in apps:
     print app['qTitle']
+
     
+### Connect to desired app    
 opened_app = ega.open_doc('8921dfe7-f46c-437c-bdb3-eb16c768793f') ##Executive Dashboard
 app_handle = ega.get_handle(opened_app)
 
@@ -118,7 +123,7 @@ df1 = pd.DataFrame(d1)
 sns.factorplot(x='orders', y='sales', hue='customer', data=df, scale = .5, markers=['o', 'v'])
 
 ### Try a StripPlot
-sns.stripplot(x='customer', y='sales', data=df);
+sns.stripplot(x='customer', y='sales', data=df, jitter=0.05);
 
 ### Try a Scatterplot
 sns.lmplot('sales', 'qty', data=df, fit_reg=False)
@@ -127,8 +132,6 @@ sns.set(style="whitegrid")
 
 ### Simple Bar Plot
 sns.barplot(x=df.customer, y=df.sales, data=df.customer.reset_index())
-
-
 
 ### KDE Plot
 sns.kdeplot(df.sales, df.qty)
