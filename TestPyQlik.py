@@ -18,10 +18,6 @@ proxyPrefix = "jupyter"
 userDirectory = "CLOUDERA"
 userId = "user_1"
 privateKey = "./private.key"
-conn = SecureEngineCommunicator(host, proxyPrefix, userDirectory, userId, privateKey)
-ega = EngineGlobalApi(conn)
-eaa = EngineAppApi(conn)
-conn.ws.recv()
 
 conn = SecureEngineCommunicator(host, proxyPrefix, userDirectory, userId, privateKey)
 efa = pyqlikengine.engine_field_api.EngineFieldApi(conn)
