@@ -14,7 +14,7 @@ import pyqlikengine.structs
 host = "cloudera.qlik.com"
 proxyPrefix = "jupyter"
 userDirectory = "CLOUDERA"
-userId = "user_1"
+userId = "chris"
 privateKey = "./private.key"
 conn = SecureEngineCommunicator(host, proxyPrefix, userDirectory, userId, privateKey)
 ega = EngineGlobalApi(conn)
@@ -123,7 +123,7 @@ df1 = pd.DataFrame(d1)
 sns.factorplot(x='orders', y='sales', hue='customer', data=df, scale = .5, markers=['o', 'v'])
 
 ### Try a StripPlot
-sns.stripplot(x='customer', y='sales', data=df, jitter=0.05);
+sns.stripplot(x='customer', y='sales', data=df, jitter=0.05, linewidth=1);
 
 ### Try a Scatterplot
 sns.lmplot('sales', 'qty', data=df, fit_reg=False)
