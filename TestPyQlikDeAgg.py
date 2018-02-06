@@ -13,18 +13,12 @@ import pyqlikengine.engine_generic_object_api
 import pyqlikengine.engine_field_api
 import pyqlikengine.structs
 
-### Set Qlik Sense Server Connection Parameters
 host = "cloudera.qlik.com"
 proxyPrefix = "jupyter"
 userDirectory = "CLOUDERA"
-userId = "chris"
+userId = "user_1"
 privateKey = "./private.key"
-conn = SecureEngineCommunicator(host, proxyPrefix, userDirectory, userId, privateKey)
-ega = EngineGlobalApi(conn)
-eaa = EngineAppApi(conn)
-conn.ws.recv()
 
-### Set up variables to user later
 conn = SecureEngineCommunicator(host, proxyPrefix, userDirectory, userId, privateKey)
 efa = pyqlikengine.engine_field_api.EngineFieldApi(conn)
 Structs = pyqlikengine.structs.Structs()
@@ -33,12 +27,11 @@ ega = EngineGlobalApi(conn)
 eaa = EngineAppApi(conn)
 conn.ws.recv()
 
+apps = ega.get_doc_list()
 
 ### List Apps available (identify the App GUID to open)
-apps = ega.get_doc_list()
 for app in apps:
     print app['qTitle']
-
     
 ### Connect to desired app    
 opened_app = ega.open_doc('8921dfe7-f46c-437c-bdb3-eb16c768793f') ##Executive Dashboard
