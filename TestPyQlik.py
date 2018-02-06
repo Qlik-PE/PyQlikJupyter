@@ -48,7 +48,7 @@ hc_inline_mes = Structs.nx_inline_measure_def("=Sum([Sales Amount])")
 ### Build hypercube from above definition
 hc_dim = Structs.nx_hypercube_dimensions(hc_inline_dim)
 hc_mes = Structs.nx_hypercube_measure(hc_mes_sort, hc_inline_mes)
-nx_page = Structs.nx_page(0, 0, 100, 3)
+nx_page = Structs.nx_page(0, 0, 5000, 2)
 hc_def = Structs.hypercube_def("$", [hc_dim],[hc_mes], [nx_page])
 hc_response = eaa.create_object(app_handle, "CH01", "Chart", "qHyperCubeDef", hc_def)
 hc_handle = ega.get_handle(hc_response)
