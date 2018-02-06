@@ -65,10 +65,25 @@ class Structs:
         return inlineDims
 
     @staticmethod
-    def nx_hypercube_measure(sort_by={}, nx_inline_measures_def=""):
-        return {"qSortBy": sort_by,
+    def nx_hypercube_measure(sort_by={}, nx_inline_measures_defs=[]):
+        qMeasures = []
+        for nx_inline_measures_def in inline_measures_defs:
+          qMeasures.append({"qSortBy": sort_by,
                 "qDef": nx_inline_measures_def
-                }
+                })
+        return qMeasures
+      
+    @staticmethod
+    def nx_inline_measure_def(definitions=[], label="", description="", tags=[], grouping="N"):
+        inlineMeas = []
+        for definition in definitions:
+          inlineMeas.append({"qLabel": label,
+                "qDescription":	description,
+                "qTags": tags,
+                "qGrouping": grouping,
+                "qDef":	definition
+                })
+        return inlineMeas
 
     @staticmethod
     def nx_sort_by(state=0, freq=0, numeric=0, ascii=0, load_order=1):
@@ -81,15 +96,6 @@ class Structs:
                 "qExpression": {
                     "qv": ""
                     }
-                }
-
-    @staticmethod
-    def nx_inline_measure_def(definition, label="", description="", tags=[], grouping="N"):
-        return {"qLabel": label,
-                "qDescription": description,
-                "qTags": tags,
-                "qGrouping": grouping,
-                "qDef": definition
                 }
 
     @staticmethod
