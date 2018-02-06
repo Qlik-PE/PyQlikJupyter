@@ -116,7 +116,7 @@ d1 = {'sales':mes1_list, 'qty':mes2_list}
 df1 = pd.DataFrame(d1)
 
 ### Set up a factorplot
-sns.factorplot(x='orders', y='sales', hue='customer', data=df, scale = .5, markers=['o', 'v'])
+sns.factorplot(x='orders', y='sales', hue='customer', data=df, scale = .5)
 
 ### Try a StripPlot
 sns.stripplot(x='customer', y='sales', data=df, jitter=0.05, linewidth=1);
