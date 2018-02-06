@@ -45,18 +45,24 @@ class Structs:
                 }
 
     @staticmethod
-    def nx_hypercube_dimensions(dim_def):
-        return {"qLibraryId": "",
+    def nx_hypercube_dimensions(dim_defs=[]):
+        qDimensions = []
+        for dim_def in dim_defs:
+          qDimensions.append({"qLibraryId": "",
                 "qNullSuppression": False,
                 "qDef": dim_def
-                }
+                })
+        return qDimensions
 
     @staticmethod
     def nx_inline_dimension_def(field_definitions=[], grouping='N', field_labels=[]):
-        return {"qGrouping": grouping,
-                "qFieldDefs": field_definitions,
+        inlineDims = []
+        for field_definition in field_definitions:
+          inlineDims.append({"qGrouping": grouping,
+                "qFieldDefs": [field_definition],
                 "qFieldLabels": field_labels
-                }
+                })
+        return inlineDims
 
     @staticmethod
     def nx_hypercube_measure(sort_by={}, nx_inline_measures_def=""):
@@ -80,10 +86,10 @@ class Structs:
     @staticmethod
     def nx_inline_measure_def(definition, label="", description="", tags=[], grouping="N"):
         return {"qLabel": label,
-                "qDescription":	description,
+                "qDescription": description,
                 "qTags": tags,
                 "qGrouping": grouping,
-                "qDef":	definition
+                "qDef": definition
                 }
 
     @staticmethod
