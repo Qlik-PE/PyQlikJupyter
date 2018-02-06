@@ -1,3 +1,15 @@
+### Import Libraries
+from pyqlikengine.engine_communicator import EngineCommunicator
+from pyqlikengine.engine_global_api import EngineGlobalApi
+from pyqlikengine.engine_app_api import EngineAppApi
+from pyqlikengine.engine_communicator import SecureEngineCommunicator
+import pyqlikengine.engine_communicator
+import pyqlikengine.engine_global_api
+import pyqlikengine.engine_app_api
+import pyqlikengine.engine_generic_object_api
+import pyqlikengine.engine_field_api
+import pyqlikengine.structs
+
 host = "cloudera.qlik.com"
 proxyPrefix = "jupyter"
 userDirectory = "CLOUDERA"
@@ -8,12 +20,6 @@ ega = EngineGlobalApi(conn)
 eaa = EngineAppApi(conn)
 conn.ws.recv()
 
-import pyqlikengine.engine_communicator
-import pyqlikengine.engine_global_api
-import pyqlikengine.engine_app_api
-import pyqlikengine.engine_generic_object_api
-import pyqlikengine.engine_field_api
-import pyqlikengine.structs
 conn = SecureEngineCommunicator(host, proxyPrefix, userDirectory, userId, privateKey)
 efa = pyqlikengine.engine_field_api.EngineFieldApi(conn)
 Structs = pyqlikengine.structs.Structs()
