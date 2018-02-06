@@ -1,36 +1,15 @@
 ### Install dependencies (Run first time project started)
 # !pip install -r requirements.txt
 
-from pyqlikengine.engine_communicator import EngineCommunicator
-from pyqlikengine.engine_global_api import EngineGlobalApi
-from pyqlikengine.engine_app_api import EngineAppApi
-from pyqlikengine.engine_communicator import SecureEngineCommunicator
+### Instantiate PyQIX
+from pyqlikengine import instantiate_helper
 
-host = "cloudera.qlik.com"
-proxyPrefix = "jupyter"
-userDirectory = "CLOUDERA"
-userId = "user_1"
-privateKey = "./private.key"
-
-conn = SecureEngineCommunicator(host, proxyPrefix, userDirectory, userId, privateKey)
-import pyqlikengine.engine_communicator
-import pyqlikengine.engine_global_api
-import pyqlikengine.engine_app_api
-from pyqlikengine.engine_generic_object_api import EngineGenericObjectApi
-import pyqlikengine.engine_field_api
-import pyqlikengine.structs
-conn = SecureEngineCommunicator(host, proxyPrefix, userDirectory, userId, privateKey)
-efa = pyqlikengine.engine_field_api.EngineFieldApi(conn)
-Structs = pyqlikengine.structs.Structs()
-egoa = pyqlikengine.engine_generic_object_api.EngineGenericObjectApi(conn)
-ega = EngineGlobalApi(conn)
-eaa = EngineAppApi(conn)
-conn.ws.recv()
-
+### Get a list of apps
 apps = ega.get_doc_list()
+
 ### List Apps available (identify the App GUID to open)
 for app in apps:
-    print app['qTitle']
+    print app['qTitle']+'-'+app['qDocId']
     
 opened_app = ega.open_doc('8921dfe7-f46c-437c-bdb3-eb16c768793f') ##Executive Dashboard
 app_handle = ega.get_handle(opened_app)
