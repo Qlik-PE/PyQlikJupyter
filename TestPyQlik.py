@@ -1,3 +1,6 @@
+### Install dependencies
+!pip install -r requirement.txt
+
 ### Import Libraries
 from pyqlikengine.engine_communicator import EngineCommunicator
 from pyqlikengine.engine_global_api import EngineGlobalApi
