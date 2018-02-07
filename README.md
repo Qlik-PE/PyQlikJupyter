@@ -20,3 +20,15 @@ Modify the default files to get started with your own project.
 * When the session has started, it will take you into the workbench interface to run code. On the left, you will see the files imported from GitHub. Click on the file "TestPyQlik.py"
 * Upon entering the TestPyQlik.py script in the Workbench, the first thing you will need to do is install the required packages. You can do this by selecting the top portion of the TestPyQlik.py script - "!pip install -r requirements.txt", and right click and choose "Run Line(s)"
 * Code will be displayed, and you will have an option to run the code.. On the menu bar just above the code, click on the black play symbol to run all of the code at one time. If you want to simply run sections of the code, you can select a section, right click, and choose "Run Line(s)"
+
+## Roadmap
+
+* More Helper functions to simplify code
+
+* Render Qlik visualizations
+
+* Collaboration / deployment options:
+
+    1. Web page / mashup sharing (similar to Shiny, uses Qlik Sense API’s)
+    2. Create/open app & load data results from Impala at end of pipeline
+    3. Deploy to AAI
