@@ -8,7 +8,7 @@ Modify the default files to get started with your own project.
 
 * `TestPyQlik.py` -- Script to execute example methods against the cloudera.qlik.com Qlik Sense demo server
 * `pyqlikengine` -- Folder containing the python module code for interacting with the Qlik Sense QIX engine. It is maintained here: https://github.com/qliknln/pyqlikengine
-* `TestPyQlikHelper.py` -- Script which uses 
+* `TestPyQlikHelper.py` -- Script which uses helper methods to greatly simplify the code. More to come!
 
 ## How to get it going
 
