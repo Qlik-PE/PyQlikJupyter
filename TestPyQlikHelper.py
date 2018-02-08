@@ -1,21 +1,3 @@
-<<<<<<< HEAD
-from pyqlikengine.engine_communicator import EngineCommunicator
-from pyqlikengine.engine_global_api import EngineGlobalApi
-from pyqlikengine.engine_app_api import EngineAppApi
-from pyqlikengine.engine_communicator import SecureEngineCommunicator
-from pyqlikengine.engine_field_api import EngineFieldApi
-
-host = "cloudera.qlik.com"
-proxyPrefix = "jupyter"
-userDirectory = "CLOUDERA"
-userId = "user_1"
-privateKey = "./private.key"
-
-conn = SecureEngineCommunicator(host, proxyPrefix, userDirectory, userId, privateKey)
-conn.ws.recv()
-ega = EngineGlobalApi(conn)
-
-=======
 ### Install dependencies (Run first time project started)
 # !pip install -r requirements.txt
 
@@ -23,7 +5,6 @@ ega = EngineGlobalApi(conn)
 from pyqlikengine import instantiate_helper
 
 ### Get a list of apps
->>>>>>> upstream/master
 apps = ega.get_doc_list()
 
 ### List Apps available (identify the App GUID to open)
