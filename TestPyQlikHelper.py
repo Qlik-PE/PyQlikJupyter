@@ -19,7 +19,9 @@ from pyqlikengine import engine_helper as pyqlikhelper
 
 dimensions = ["Customer","Order Number"]
 measures = ["=Sum([Sales Amount])", "=Avg([Sales Amount])"]
-df = pyqlikhelper.getDataFrame(conn, app_handle, measures, dimensions)
+selections = {"Customer": ["Sigma"]}
+df = pyqlikhelper.getDataFrame(conn, app_handle, measures, dimensions, selections)
+conn.close_qvengine_connection(conn)
 
 ############ VISUALIZE #############
 

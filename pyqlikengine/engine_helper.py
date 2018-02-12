@@ -3,9 +3,10 @@ import math
 from engine_app_api import EngineAppApi
 from engine_global_api import EngineGlobalApi
 from engine_generic_object_api import EngineGenericObjectApi
+from engine_field_api import EngineFieldApi
 import pandas as pd
 
-def getDataFrame(connection, appHandle, measures, dimensions, selections=[]):
+def getDataFrame(connection, appHandle, measures, dimensions, selections={}):
     engineGlobalApi = EngineGlobalApi(connection)
     ### Define Dimensions of hypercube
     hc_inline_dim = Structs.nx_inline_dimension_def(dimensions)
@@ -30,6 +31,16 @@ def getDataFrame(connection, appHandle, measures, dimensions, selections=[]):
     hc_handle = engineGlobalApi.get_handle(hc_response)
 
     engineGenericObjectApi = EngineGenericObjectApi(connection)
+    
+    engineFieldApi = EngineFieldApi(connection)
+    
+    for field in selections.keys():
+      fieldHandle = engineGlobalApi.get_handle(engineAppApi.get_field(appHandle, field))
+      values = []
+      for selectedValue in selections[field]:
+        values.append({'qText': selectedValue})
+
+      engineFieldApi.select_values(fieldHandle,values)
 
     i = 0
     while i % height == 0:
@@ -47,6 +58,7 @@ def getDataFrame(connection, appHandle, measures, dimensions, selections=[]):
             for meas in measures:
                 df.set_value(i, meas, elem[j]["qNum"])
                 j += 1
+            
             i += 1
 
     return df
