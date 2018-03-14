@@ -25,4 +25,4 @@ df = pyqlikhelper.getDataFrame(helper.conn, app_handle, measures, dimensions, se
 ############ VISUALIZE #############
 
 df.plot()
-print df
+df
