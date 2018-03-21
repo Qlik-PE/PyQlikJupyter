@@ -1,299 +1,127 @@
-import json
+import engine_app_api, engine_communicator, engine_field_api, engine_generic_object_api, engine_global_api, structs
 
 
-class EngineGlobalApi:
-    def __init__(self, socket):
-        self.engine_socket = socket
+class QixEngine:
 
-    # returns an array of doc objects. The doc object contains doc name, size, file time etc
-    def get_doc_list(self):
-        msg = json.dumps({"jsonrpc": "2.0", "id": 0, "handle": -1, "method": "GetDocList", "params": []})
-        response = json.loads(self.engine_socket.send_call(self.engine_socket, msg))
+    def __init__(self, url, is_secure=False, proxy_prefix='', user_directory='', user_id='', private_key_path='',
+                 ignore_cert_errors=False):
+        self.url = url
+        if is_secure:
+            self.conn = engine_communicator.SecureEngineCommunicator(url, proxy_prefix, user_directory,user_id,
+                                                                    private_key_path, ignore_cert_errors)
+        else:
+            self.conn = engine_communicator.EngineCommunicator(url)
+        self.ega = engine_global_api.EngineGlobalApi(self.conn)
+        self.eaa = engine_app_api.EngineAppApi(self.conn)
+        self.egoa = engine_generic_object_api.EngineGenericObjectApi(self.conn)
+        self.efa = engine_field_api.EngineFieldApi(self.conn)
+        self.Structs = structs.Structs()
+        self.app_handle = ''
+
+    def create_app(self, app_name='my_app'):
+        app = self.ega.create_app(app_name)
         try:
-            return response['result']['qDocList']
+            return app['qAppId']
         except KeyError:
-            return response['error']
+            return app['message']
 
-    # returns the os name (always windowsNT). Obsolete?
-    def get_os_name(self):
-        msg = json.dumps({"jsonrpc": "2.0", "id": 0, "handle": -1, "method": "OSName", "params": []})
-        response =json.loads(self.engine_socket.send_call(self.engine_socket, msg))
-        try:
-            return response['result']['qReturn']
-        except KeyError:
-            return response['error']
+    def load_script(self, script):
+        self.eaa.set_script(self.app_handle, script)
+        return self.eaa.do_reload_ex(self.app_handle)['qResult']['qSuccess']
 
-    # returns the app id. If desktop is used the app id is the same as the full path to qvf
-    # if it's running against Enterprise, app id will be a guid
-    def create_app(self, app_name):
-        msg = json.dumps({"jsonrpc": "2.0", "id": 0, "handle": -1, "method": "CreateApp", "params": [app_name]})
-        response = json.loads(self.engine_socket.send_call(self.engine_socket, msg))
-        try:
-            return response['result']
-        except KeyError:
-            return response["error"]
+    def open_app(self, app_obj):
+        opened_app = self.ega.open_doc(app_obj)['qReturn']
+        self.app_handle = self.ega.get_handle(opened_app)
+        return opened_app['qGenericId']
 
+    def create_hypercube(self, list_of_dimensions=[], list_of_measures=[], rows_to_return=1000):
+        no_of_columns = len(list_of_dimensions) + len(list_of_measures)
+        hc_dim = []
+        for d in list_of_dimensions:
+            hc_inline_dim = self.Structs.nx_inline_dimension_def([d])
+            hc_dim.append(self.Structs.nx_hypercube_dimensions(hc_inline_dim))
+        hc_mes = []
+        for m in list_of_measures:
+            hc_mes_sort = self.Structs.nx_sort_by()
+            hc_inline_mes = self.Structs.nx_inline_measure_def(m)
+            hc_mes.append(self.Structs.nx_hypercube_measure(hc_mes_sort, hc_inline_mes))
+        nx_page = self.Structs.nx_page(0, 0, rows_to_return, no_of_columns)
+        hc_def = self.Structs.hypercube_def("$", hc_dim, hc_mes, [nx_page])
+        hc_response = self.eaa.create_object(self.app_handle, "CH01", "Chart", "qHyperCubeDef", hc_def)
+        hc_handle = self.ega.get_handle(hc_response["qReturn"])
+        self.egoa.get_layout(hc_handle)
+        hc_data = self.egoa.get_hypercube_data(hc_handle, "/qHyperCubeDef", [nx_page])
+        no_of_columns = len(list_of_dimensions)+len(list_of_measures)
+        return hc_data, no_of_columns
 
-    # DeleteApp Method Deletes an app from the Qlik Sense repository or from the file system. Qlik Sense Enterprise:
-    # In addition to being removed from the repository, the app is removed from the directory as well:
-    # <installation_directory>\Qlik\Sense\Apps The default installation directory is ProgramData. Qlik Sense Desktop:
-    #  The app is deleted from the directory %userprofile%\Documents\Qlik\Sense\Apps. Parameters: qAppId.. Identifier
-    #  of the app to delete. In Qlik Sense Enterprise, the identifier of the app is a GUID in the Qlik Sense
-    # repository. In Qlik Sense Desktop, the identifier of the app is the name of the app, as defined in the apps
-    # folder %userprofile%\Documents\Qlik\Sense\Apps. This parameter is mandatory.
+    @staticmethod
+    def convert_hypercube_to_matrix(hc_data, no_of_columns):
+        rows = hc_data["qDataPages"][0]['qMatrix']
+        matrix = [[0 for x in range(no_of_columns)] for y in range(len(rows))]
+        for col_idx, row in enumerate(rows):
+            for cell_idx, cell_val in enumerate(row):
+                matrix[col_idx][cell_idx] = cell_val['qText']
+        return [list(i) for i in zip(*matrix)]
+
+    @staticmethod
+    def convert_hypercube_to_inline_table(hc_data, table_name):
+        rows = hc_data["qDataPages"][0]['qMatrix']
+        script = str.format('{0}:{1}Load * Inline [{1}', table_name, '\n')
+        inline_rows = ''
+        header_row = ''
+        for col_idx in range(len(rows[0])):
+            header_row = header_row + str.format('Column{0}{1}', col_idx, ',')
+        header_row = header_row[:-1] + '\n'
+        for row in rows:
+            for cell_val in row:
+                inline_rows = inline_rows + "'" + cell_val['qText'] + "'" + ','
+            inline_rows = inline_rows[:-1] + '\n'
+        return script + header_row + inline_rows + '];'
+
+    def select_in_dimension(self,dimension_name, list_of_values):
+        lb_field = self.eaa.get_field(self.app_handle, dimension_name)
+        fld_handle = self.ega.get_handle(lb_field["qReturn"])
+        values_to_select = []
+        for val in list_of_values:
+            val = {'qText': val}
+            values_to_select.append(val)
+        return self.efa.select_values(fld_handle, values_to_select)
+
+    def select_excluded_in_dimension(self, dimension_name):
+        lb_field = self.eaa.get_field(self.app_handle, dimension_name)
+        fld_handle = self.ega.get_handle(lb_field["qReturn"])
+        return self.efa.select_excluded(fld_handle)
+
+    def select_possible_in_dimension(self, dimension_name):
+        lb_field = self.eaa.get_field(self.app_handle, dimension_name)
+        fld_handle = self.ega.get_handle(lb_field["qReturn"])
+        return self.efa.select_possible(fld_handle)
+
+    # return a list of tuples where first value in tuple is the actual data value and the second tuple value is that
+    # values selection state
+    def get_list_object_data(self, dimension_name):
+        lb_field = self.eaa.get_field(self.app_handle, dimension_name)
+        fld_handle = self.ega.get_handle(lb_field["qReturn"])
+        nx_page = self.Structs.nx_page(0, 0, self.efa.get_cardinal(fld_handle)["qReturn"])
+        lb_def = self.Structs.list_object_def("$", "", [dimension_name], None, None, [nx_page])
+        lb_param = {"qInfo": {"qId": "SLB01", "qType": "ListObject"}, "qListObjectDef": lb_def}
+        listobj_handle = self.eaa.create_session_object(self.app_handle, lb_param)["qReturn"]["qHandle"]
+        val_list = self.egoa.get_layout(listobj_handle)["qLayout"]["qListObject"]["qDataPages"][0]["qMatrix"]
+        val_n_state_list=[]
+        for val in val_list:
+            val_n_state_list.append((val[0]["qText"],val[0]["qState"]))
+        return val_n_state_list
+
+    def clear_selection_in_dimension(self, dimension_name):
+        lb_field = self.eaa.get_field(self.app_handle, dimension_name)
+        fld_handle = self.ega.get_handle(lb_field["qReturn"])
+        return self.efa.clear(fld_handle)['qReturn']
+
+    def clear_all_selections(self):
+        return self.eaa.clear_all(self.app_handle, True)
+
     def delete_app(self, app_name):
-        msg = json.dumps({"jsonrpc": "2.0", "id": 0, "handle": -1, "method": "DeleteApp", "params": [app_name]})
-        response = json.loads(self.engine_socket.send_call(self.engine_socket, msg))
-        try:
-            return response['result']
-        except KeyError:
-            return response["error"]
+        return self.ega.delete_app(app_name)['qSuccess']
 
-    # opens an app and returns an object with handle, generic id and type
-    def open_doc(self, app_name, user_name='', password='', serial='', no_data=False):
-        msg = json.dumps(
-            {"jsonrpc": "2.0", "id": 0, "handle": -1, "method": "OpenDoc", "params": [app_name, user_name,
-                                                                                      password, serial,
-                                                                                      no_data]})
-        response = json.loads(self.engine_socket.send_call(self.engine_socket, msg))
-        try:
-            return response['result']
-        except KeyError:
-            return response["error"]
-
-    # returns an object with handle, generic id and type for the active app
-    def get_active_doc(self):
-        msg = json.dumps({"jsonrpc": "2.0", "id": 0, "handle": -1, "method": "GetActiveDoc", "params": []})
-        response = json.loads(self.engine_socket.send_call(self.engine_socket, msg))
-        try:
-            return response['result']
-        except KeyError:
-            return response["error"]
-
-    @staticmethod
-    def get_handle(obj):
-        try:
-            return obj["qHandle"]
-        except ValueError:
-            return "Bad handle value in " + obj
-
-    # Abort All commands
-    def abort_all(self):
-        msg = json.dumps({"jsonrpc": "2.0", "id": 0, "handle": -1, "method": "AbortAll", "params": []})
-        response = json.loads(self.engine_socket.send_call(self.engine_socket, msg))
-        try:
-            return response['result']
-        except KeyError:
-            return response["error"]
-
-    # Abort Specific Request
-    def abort_request(self, request_id):
-        msg = json.dumps(
-            {"jsonrpc": "2.0", "id": 0, "handle": -1, "method": "AbortRequest", "params": {"qRequestId": request_id}})
-        response = json.loads(self.engine_socket.send_call(self.engine_socket, msg))
-        try:
-            return response['result']  # ['qReturn']
-        except KeyError:
-            return response["error"]
-
-    # Configure Reload - This is done before doing a reload qCancelOnScriptError: If set to true, the script
-    # execution is halted on error. Otherwise, the engine continues the script execution. This parameter is relevant
-    # only if the variable ErrorMode is set to 1. qUseErrorData: If set to true, any script execution error is
-    # returned in qErrorData by the GetProgress method. qInteractOnError: If set to true, the script execution is
-    # halted on error and the engine is waiting for an interaction to be performed. If the result from the
-    # interaction is 1 (qDef.qResult is 1), the engine continues the script execution otherwise the execution is
-    # halted. This parameter is relevant only if the variable ErrorMode is set to 1 and the script is run in debug
-    # mode (qDebug is set to true when calling the DoReload method).
-    def configure_reload(self, cancel_on_error=False, use_error_data=True, interact_on_error=False):
-        msg = json.dumps({"jsonrpc": "2.0", "id": 0, "handle": -1, "method": "ConfigureReload",
-                          "params": {"qCancelOnScriptError": cancel_on_error, "qUseErrorData": use_error_data,
-                                     "qInteractOnError": interact_on_error}})
-        response = json.loads(self.engine_socket.send_call(self.engine_socket, msg))
-        try:
-            return response['result']
-        except KeyError:
-            return response["error"]
-
-    # Copy app - This is done before doing a reload qTargetAppId (MANDATORY):  Identifier (GUID) of the app
-    # entity in the Qlik Sense repository. The app entity must have been previously created by the repository (via
-    # the REST API). qSrcAppId (MANDATORY): Identifier (GUID) of the source app in the Qlik Sense repository. Array
-    # of QRS identifiers. The list of all the objects in the app to be copied must be given. This list must contain
-    # the GUIDs of all these objects. If the list of the QRS identifiers is empty, the CopyApp method copies all
-    # objects to the target app. Script-defined variables are automatically copied when copying an app. To be able to
-    #  copy variables not created via script, the GUID of each variable must be provided in the list of QRS
-    # identifiers. To get the QRS identifiers of the objects in an app, you can use the QRS API. The GET method (from
-    #  the QRS API) returns the identifiers of the objects in the app. The following example returns the QRS
-    # identifiers of all the objects in a specified app: GET /qrs/app/9c3f8634-6191-4a34-a114-a39102058d13 Where
-    # 9c3f8634-6191-4a34-a114-a39102058d13 is the identifier of the app.
-
-    # BUG - Does not work in September 2017 release
-    def copy_app(self, target_app_id, src_app_id, qIds=[""]):
-        msg = json.dumps({"jsonrpc": "2.0", "id": 0, "handle": -1, "method": "CopyApp",
-                          "params": {"qTargetAppId": target_app_id, "qSrcAppId": src_app_id, "qIds": qIds}})
-        response = json.loads(self.engine_socket.send_call(self.engine_socket, msg))
-        try:
-            return response['result']
-        except KeyError:
-            return response["error"]
-
-    # Creates an empty session app. The following applies: The name of a session app cannot be chosen. The engine
-    # automatically assigns a unique identifier to the session app. A session app is not persisted and cannot be
-    # saved. Everything created during a session app is non-persisted; for example: objects, data connections.
-    def create_session_app(self):
-        msg = json.dumps({"jsonrpc": "2.0", "id": 0, "handle": -1, "method": "CreateSessionApp", "params": {}})
-        response = json.loads(self.engine_socket.send_call(self.engine_socket, msg))
-        try:
-            return response['result']
-        except KeyError:
-            return response["error"]
-
-            # Return the session App Id to use for subsequent calls
-            # The identifier of the session app is composed of the prefix SessionApp_ and of a GUID.
-              # ['qReturn']
-
-    # Create an empty session app from an Existing App The objects in the source app are copied into the session app
-    # but contain no data. The script of the session app can be edited and reloaded. The name of a session app cannot
-    #  be chosen. The engine automatically assigns a unique identifier to the session app. A session app is not
-    # persisted and cannot be saved. Everything created during a session app is non-persisted; for example: objects,
-    # data connections.
-    def create_session_app_from_app(self, src_app_id):
-        msg = json.dumps({"jsonrpc": "2.0", "id": 0, "handle": -1, "method": "CreateSessionAppFromApp",
-                          "params": {"qSrcAppId": src_app_id}})
-        response = json.loads(self.engine_socket.send_call(self.engine_socket, msg))
-        try:
-            return response['result']
-        except KeyError:
-            return response["error"]
-
-    # ExportApp method: Exports an app from the Qlik Sense repository to the file system. !!! This operation is
-    # possible only in Qlik Sense Enterprise. !!! Parameters: qTargetPath (MANDATORY) - Path and name of the target
-    # app qSrcAppId (MANDATORY) - Identifier of the source app. The identifier is a GUID from the Qlik Sense
-    # repository. qIds - Array of identifiers.. The list of all the objects in the app to be exported must be given.
-    # This list must contain the GUIDs of all these objects.
-    def export_app(self, target_path, src_app_id, qIds = [""]):
-        msg = json.dumps({"jsonrpc": "2.0", "id": 0, "handle": -1, "method": "ExportApp",
-                          "params": {"qTargetPath": target_path, "qSrcAppId": src_app_id, "qIds": qIds}})
-        response = json.loads(self.engine_socket.send_call(self.engine_socket, msg))
-        try:
-            return response['result']
-        except KeyError:
-            return response["error"]
-
-    # ReplaceAppFromID method: Replaces an app with the objects from a source app. The list of objects in the app to
-    # be replaced must be defined in qIds. !!! This operation is possible only in Qlik Sense Enterprise. !!!
-    # Parameters: qTargetAppId (MANDATORY) - Identifier (GUID) of the target app. The target app is the app to be
-    # replaced. qSrcAppId (MANDATORY) - Identifier of the source app. The identifier is a GUID from the Qlik Sense
-    # repository. qIds - QRS identifiers (GUID) of the objects in the target app to be replaced. Only QRS-approved
-    # GUIDs are applicable. An object that is QRS-approved, is for example an object that has been published (i.e not
-    #  private anymore). If an object is private, it should not be included in this list.  If qIds is empty,
-    # the engine automatically creates a list that contains all QRS-approved objects. If the array of identifiers
-    # contains objects that are not present in the source app, the objects related to these identifiers are removed
-    # from the target app.
-    def replace_app_from_id(self, target_path, src_app_id, qIds=[""]):
-        msg = json.dumps({"jsonrpc": "2.0", "id": 0, "handle": -1, "method": "ReplaceAppFromID",
-                          "params": {"qTargetAppId": target_path, "qSrcAppId": src_app_id, "qIds": qIds}})
-        response = json.loads(self.engine_socket.send_call(self.engine_socket, msg))
-        try:
-            return response['result']
-        except KeyError:
-            return response['error']
-
-    # GetAuthenticatedUser
-    # No parameters
-    def get_auth_user(self):
-        msg = json.dumps({"jsonrpc": "2.0", "id": 0, "handle": -1, "method": "GetAuthenticatedUser", "params": {}})
-        response_json = json.loads(self.engine_socket.send_call(self.engine_socket, msg))
-        try:
-            return response_json["result"]
-        except:
-            return response_json["error"]
-
-    # GetDatabasesFromConnectionString Lists the databases in a ODBC, OLEDB or CUSTOM data source (global level)
-    # Parameters: qConnection (object - has several fields) qId: Identifier of the connection. Is generated by
-    # the engine and is unique. qName (MANDATORY): Name of the connection. This parameter is mandatory and must
-    # be set when creating or modifying a connection. qConnectionString (MANDATORY): One of: ODBC CONNECT TO [
-    # <provider name>], OLEDB CONNECT TO [<provider name>], CUSTOM CONNECT TO [<provider name>], "<local absolute
-    #  or relative path,UNC path >", "<URL>" Connection string. qType (MANDATORY): Type of the connection. One
-    # of- ODBC, OLEDB, <Name of the custom connection file>, folder, internet. For ODBC, OLEDB and custom
-    # connections, the engine checks that the connection type matches the connection string. The type is not case
-    #  sensitive. qUserName: Name of the user who creates the connection. This parameter is optional; it is only
-    # used for OLEDB, ODBC and CUSTOM connections. A call to GetConnection method does not return the user name.
-    # qPassword: Password of the user who creates the connection. This parameter is optional; it is only used for
-    #  OLEDB, ODBC and CUSTOM connections. A call to GetConnection method does not return the password.
-    # qModifiedDate: Is generated by the engine. Creation date of the connection or last modification date of the
-    #  connection. qMeta: Information about the connection. qLogOn (SSO Passthrough or not): Select which user
-        # credentials to use to connect to the source. LOG_ON_SERVICE_USER: Disables, LOG_ON_CURRENT_USER: Enables
-    def list_databases_from_odbc(self, connect_name, connect_string, connect_type, user_name, password, mod_date="",
-                                 meta="", sso_passthrough="LOG_ON_SERVICE_USER"):
-        msg = json.dumps({"jsonrpc": "2.0", "id": 0, "handle": -1, "method": "GetDatabasesFromConnectionString",
-                          "params": [{"qId": "", "qName": connect_name, "qConnectionString": connect_string,
-                                      "qType": connect_type, "qUserName": user_name, "qPassword": password,
-                                      "qModifiedDate": mod_date, "qMeta": meta, "qLogOn": sso_passthrough}]})
-        response = json.loads(self.engine_socket.send_call(self.engine_socket, msg))
-        try:
-            return response['result']
-        except KeyError:
-            return response['error']
-
-    # IsValidConnectionString method: Checks if a connection string is valid.
-    def is_valid_connect_string(self, connect_name, connect_string, connect_type, user_name, password, mod_date="",
-                                meta="", sso_passthrough="LOG_ON_SERVICE_USER"):
-        msg = json.dumps({"jsonrpc": "2.0", "id": 0, "handle": -1, "method": "IsValidConnectionString", "params": [
-            {"qId": "", "qName": connect_name, "qConnectionString": connect_string, "qType": connect_type,
-             "qUserName": user_name, "qPassword": password, "qModifiedDate": mod_date, "qMeta": meta,
-             "qLogOn": sso_passthrough}]})
-        response = json.loads(self.engine_socket.send_call(self.engine_socket, msg))
-        try:
-            return response['result'] # Returns an array of databases
-        except KeyError:
-            return response['error']
-
-    # GetOdbcDsns: List all the ODBC connectors installed on the Sense server machine in Windows
-    def get_odbc_dsns(self):
-        msg = json.dumps({"jsonrpc": "2.0", "id": 0, "handle": -1, "method": "GetOdbcDsns", "params": {}})
-        response = json.loads(self.engine_socket.send_call(self.engine_socket, msg))
-        try:
-            return response['result']
-        except KeyError:
-            return response['error']
-
-    # GetOleDbProviders: Returns the list of the OLEDB providers installed on the system.
-    def get_ole_dbs(self):
-        msg = json.dumps({"jsonrpc": "2.0", "id": 0, "handle": -1, "method": "GetOleDbProviders", "params": {}})
-        response = json.loads(self.engine_socket.send_call(self.engine_socket, msg))
-        try:
-            return response['result']
-        except KeyError:
-            return response['error']
-
-    # GetProgress: Gives information about the progress of the DoReload and DoSave calls. Parameters: qRequestId:
-    # Identifier of the DoReload or DoSave request or 0. Complete information is returned if the identifier of the
-    # request is given. If the identifier is 0, less information is given. Progress messages and error messages are
-    # returned but information like when the request started and finished is not returned.
-
-    def get_progress(self, request_id):
-        msg = json.dumps({"jsonrpc": "2.0", "id": 0, "handle": -1, "method": "GetProgress", "params": {}})
-        response = json.loads(self.engine_socket.send_call(self.engine_socket, msg))
-        try:
-            return response['result']
-        except KeyError:
-            return response['error']
-
-    # IsDesktopMode: Indicates whether the user is working in Qlik Sense Desktop.
-    # No parameters
-    def is_desktop_mode(self, request_id):
-        msg = json.dumps({"jsonrpc": "2.0", "id": 0, "handle": -1, "method": "IsDesktopMode", "params": {}})
-        response = json.loads(self.engine_socket.send_call(self.engine_socket, msg))
-        try:
-            return response['result']
-        except KeyError:
-            return response['error']
-
-    @staticmethod
-    def get_doc_handle(doc_object):
-        return doc_object['qHandle']
-
-    # ## NOT IMPLEMENTED, perceived out of use case scope: ## CreateDocEx, GetBaseBNFHash, GetBaseBNF, GetBNF,
-        # GetCustomConnectors, GetDefaultAppFolder, GetFunctions, GetInteract, GetLogicalDriveStrings,
-        # ## GetStreamList, GetSupportedCodePages, GetUniqueID, InteractDone, IsPersonalMode (deprecated), OSVersion,
-        #  ProductVersion (depr), QTProduct, QvVersion (depr), ## ReloadExtensionList, ReplaceAppFromID,
+    def disconnect(self):
+        self.conn.close_qvengine_connection(self.conn)
