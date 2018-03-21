@@ -1,10 +1,12 @@
-from engine_communicator import EngineCommunicator
-from engine_global_api import EngineGlobalApi
-from engine_app_api import EngineAppApi
-from engine_generic_object_api import EngineGenericObjectApi
-from engine_field_api import EngineFieldApi
-from structs import Structs
 import unittest
+
+from engine_app_api import EngineAppApi
+from engine_communicator import EngineCommunicator
+from engine_field_api import EngineFieldApi
+from engine_global_api import EngineGlobalApi
+from structs import Structs
+
+from engine_generic_object_api import EngineGenericObjectApi
 
 
 class TestFieldApi(unittest.TestCase):
@@ -17,30 +19,31 @@ class TestFieldApi(unittest.TestCase):
         self.egoa = EngineGenericObjectApi(self.conn)
         self.efa = EngineFieldApi(self.conn)
         self.struct = Structs()
-        self.app = self.ega.create_app("TestApp")
+        self.app = self.ega.create_app("TestApp")["qAppId"]
         opened_app = self.ega.open_doc(self.app)
-        self.app_handle = self.ega.get_handle(opened_app)
-        script = file('./test/test_data/ctrl00_script.qvs').read()
+        self.app_handle = self.ega.get_handle(opened_app['qReturn'])
+        with open('./test/test_data/ctrl00_script.qvs') as f:
+            script = f.read()
         self.eaa.set_script(self.app_handle, script)
         self.eaa.do_reload_ex(self.app_handle)
         nx_page_initial = Structs.nx_page(0, 0, 26, 1)
         self.lb_def = Structs.list_object_def("$","",["Alpha"],None,None,[nx_page_initial])
         self.lb_param = {"qInfo":{"qId": "SLB01", "qType": "ListObject"}, "qListObjectDef": self.lb_def}
         self.lb_sobject = self.eaa.create_session_object(self.app_handle, self.lb_param)
-        self.lb_handle = self.ega.get_handle(self.lb_sobject)
+        self.lb_handle = self.ega.get_handle(self.lb_sobject["qReturn"])
         self.egoa.get_layout(self.lb_handle)
         self.lb_field = self.eaa.get_field(self.app_handle, "Alpha")
-        self.fld_handle = self.ega.get_handle(self.lb_field)
+        self.fld_handle = self.ega.get_handle(self.lb_field["qReturn"])
 
     def test_select_values(self):
         values_to_select = [{'qText': 'A'}, {'qText': 'B'}, {'qText': 'C'}]
         sel_res = self.efa.select_values(self.fld_handle,values_to_select)
-        self.assertTrue(sel_res[0]["qReturn"] is True, "Failed to perform selection")
-        val_mtrx = self.egoa.get_layout(self.lb_handle)["result"]["qLayout"]["qListObject"]["qDataPages"][0]["qMatrix"]
+        self.assertTrue(sel_res["qReturn"] is True, "Failed to perform selection")
+        val_mtrx = self.egoa.get_layout(self.lb_handle)["qLayout"]["qListObject"]["qDataPages"][0]["qMatrix"]
         self.assertEqual(val_mtrx[0][0]["qState"],"S","Failed to select first value")
         self.assertEqual(val_mtrx[4][0]["qState"], "X", "Failed to exclude fifth value")
         self.eaa.clear_all(self.app_handle)
-        val_mtrx = self.egoa.get_layout(self.lb_handle)["result"]["qLayout"]["qListObject"]["qDataPages"][0]["qMatrix"]
+        val_mtrx = self.egoa.get_layout(self.lb_handle)["qLayout"]["qListObject"]["qDataPages"][0]["qMatrix"]
         self.assertEqual(val_mtrx[0][0]["qState"], "O", "Failed to clear selection")
         self.assertEqual(val_mtrx[4][0]["qState"], "O", "Failed to clear selection")
 
