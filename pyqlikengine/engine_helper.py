@@ -1,9 +1,9 @@
-from structs import Structs
+from pyqlikengine.structs import Structs
 import math
-from engine_app_api import EngineAppApi
-from engine_global_api import EngineGlobalApi
-from engine_generic_object_api import EngineGenericObjectApi
-from engine_field_api import EngineFieldApi
+from pyqlikengine.engine_app_api import EngineAppApi
+from pyqlikengine.engine_global_api import EngineGlobalApi
+from pyqlikengine.engine_generic_object_api import EngineGenericObjectApi
+from pyqlikengine.engine_field_api import EngineFieldApi
 import pandas as pd
 
 def getDataFrame(connection, appHandle, measures, dimensions, selections={}):
@@ -47,7 +47,7 @@ def getDataFrame(connection, appHandle, measures, dimensions, selections={}):
         nx_page = Structs.nx_page(i, 0, height, width)
         hc_data = engineGenericObjectApi.get_hypercube_data(hc_handle, "/qHyperCubeDef", [nx_page])
         elems = hc_data["qDataPages"][0]['qMatrix']
-
+        
         df = pd.DataFrame()
 
         for elem in elems:

@@ -9,7 +9,7 @@ apps = helper.ega.get_doc_list()
 
 ### List Apps available (identify the App GUID to open)
 for app in apps:
-    print app['qTitle']+'-'+app['qDocId']
+    print (app['qTitle']+'-'+app['qDocId'])
     
 opened_app = helper.ega.open_doc('8921dfe7-f46c-437c-bdb3-eb16c768793f') ##Executive Dashboard
 app_handle = helper.ega.get_handle(opened_app)
