@@ -34,7 +34,7 @@ for app in apps:
     print app['qTitle']
     
 ### Connect to desired app    
-opened_app = ega.open_doc('de1eb0ac-7c1c-406d-a9b6-4fde5d201183') ##Executive Dashboard
+opened_app = ega.open_doc('de1eb0ac-7c1c-406d-a9b6-4fde5d201183') ##Retail Price Data
 app_handle = ega.get_handle(opened_app)
 
 ### Define Dimensions of hypercube
