@@ -1,9 +1,9 @@
-from pyqlikengine.structs import Structs
+from structs import Structs
 import math
-from pyqlikengine.engine_app_api import EngineAppApi
-from pyqlikengine.engine_global_api import EngineGlobalApi
-from pyqlikengine.engine_generic_object_api import EngineGenericObjectApi
-from pyqlikengine.engine_field_api import EngineFieldApi
+from engine_app_api import EngineAppApi
+from engine_global_api import EngineGlobalApi
+from engine_generic_object_api import EngineGenericObjectApi
+from engine_field_api import EngineFieldApi
 import pandas as pd
 
 def getDataFrame(connection, appHandle, measures, dimensions, selections={}):
