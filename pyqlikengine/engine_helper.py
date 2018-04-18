@@ -38,8 +38,11 @@ def getDataFrame(connection, appHandle, measures, dimensions, selections={}):
       fieldHandle = engineGlobalApi.get_handle(engineAppApi.get_field(appHandle, field))
       values = []
       for selectedValue in selections[field]:
-        values.append({'qText': selectedValue})
-
+        if isinstance(selectedValue, basestring):
+          values.append({'qText': selectedValue})
+        else:
+          values.append({'qIsNumeric': True, 'qNumber': selectedValue})
+      print values
       engineFieldApi.select_values(fieldHandle,values)
 
     i = 0
@@ -47,16 +50,18 @@ def getDataFrame(connection, appHandle, measures, dimensions, selections={}):
         nx_page = Structs.nx_page(i, 0, height, width)
         hc_data = engineGenericObjectApi.get_hypercube_data(hc_handle, "/qHyperCubeDef", [nx_page])
         elems = hc_data["qDataPages"][0]['qMatrix']
-        
+
         df = pd.DataFrame()
 
         for elem in elems:
             j = 0
             for dim in dimensions:
-                df.set_value(i, dim, elem[j]["qText"])
+                if "qText" in elem[j].keys():
+                  df.set_value(i, dim, elem[j]["qText"])
                 j += 1
             for meas in measures:
-                df.set_value(i, meas, elem[j]["qNum"])
+                if "qNum" in elem[j].keys():
+                  df.set_value(i, meas, elem[j]["qNum"])
                 j += 1
             
             i += 1
