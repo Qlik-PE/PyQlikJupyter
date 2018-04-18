@@ -1,12 +1,8 @@
 ### Install dependencies (Run first time project started)
 # !pip install -r requirements.txt
 
-import datarobot as dr
-import json
-import pandas as pd
-import requests, sys
+### Instantiate PyQIX
 from pyqlikengine import instantiate_helper as helper
-from pyqlikengine import engine_helper as pyqlikhelper
 
 ### Get a list of apps
 apps = helper.ega.get_doc_list()
@@ -15,36 +11,29 @@ apps = helper.ega.get_doc_list()
 for app in apps:
     print (app['qTitle']+'-'+app['qDocId'])
 
-opened_app = helper.ega.open_doc('de1eb0ac-7c1c-406d-a9b6-4fde5d201183') ##Price History App
+opened_app = helper.ega.open_doc('de1eb0ac-7c1c-406d-a9b6-4fde5d201183') ##Executive Dashboard
 app_handle = helper.ega.get_handle(opened_app)
 
-dimensions =["id","Rating_Class","Sub_Rating_Class","Renewal_class","Sub_Renewal_Class","Property_size","Residents","Commercial","Norm_monthly_rent","No_claim_Years","Previous_claims","Norm_area_m","Premium_remain","Premium_renew","Renewal_Type","crime_property_type","crime_residents","crime_area","crime_arson","crime_burglary","crime_neighbour_watch","crime_community","crime_risk","Geographical_risk","Weather_risk","ISO_cat","ISO_desc","review_scores","region","last_review"]
+
+from pyqlikengine import engine_helper as pyqlikhelper
+
+dimensions =["id","Rating_Class","Sub_Rating_Class","Renewal_class","Sub_Renewal_Class",
+             "Property_size","Residents","Commercial","Norm_monthly_rent","No_claim_Years",
+             "Previous_claims","Norm_area_m","Premium_remain","Premium_renew","Renewal_Type",
+             "crime_property_type","crime_residents","crime_area","crime_arson","crime_burglary",
+             "crime_neighbour_watch","crime_community","crime_risk","Geographical_risk","Weather_risk",
+             "ISO_cat","ISO_desc","review_scores","region","last_review"]
 measures = []
-selections = {"id": ["9120"]}
+selections = {"id": [9120]}
 df = pyqlikhelper.getDataFrame(helper.conn, app_handle, measures, dimensions, selections)
 df
 
-row = df.loc[[0]]
-row_json = row.to_json(orient='records')
-print row_json
+row_json = df.to_json(orient='records')
+print row_json  
 
-loss_model_id = "5ad4d867c2674e17de32822a"
-loss_project_id = "5ad4d836e3cd9b0e5e90b89f"
-
-conversion_model_id = "5ad4d9a6c2674e476194eb47"
-conversion_project_id = "5ad4d933e3cd9b11099173dc"
-
-# Prediction API function for 1 JSON
-def predict_API_call(host, headers, username, token, model_id, project_id, data, classif=True):
-    response = requests.post('%s/api/v1/%s/%s/predict' % (host, project_id, model_id),
-                            auth=(username, token), data=data, headers=headers)
-    output = response.json()
-    if classif:
-        predictions = [record['class_probabilities']['1.0'] 
-                       for record in output['predictions']]
-    else:
-        predictions = [record['prediction'] for record in output['predictions']]
-    return predictions
+import datarobot as dr
+import json
+import pandas as pd
 
 # Modelling API parameters
 token = 'StcF5iwvv8IAjk9Mytl0e8EKkS35hWeA'
@@ -56,6 +45,27 @@ dr.Client(token=token, endpoint='%s/api/v2' % host)
 # Prediction API parameters
 prediction_host = 'https://qlik.orm.datarobot.com'
 headers = {'Content-Type': 'application/json', 'datarobot-key': '94d2823a-cd48-8be3-03de-fd0f58515e66'}
+
+loss_model_id = "5ad4d867c2674e17de32822a"
+loss_project_id = "5ad4d836e3cd9b0e5e90b89f"
+
+conversion_model_id = "5ad4d9a6c2674e476194eb47"
+conversion_project_id = "5ad4d933e3cd9b11099173dc"
+
+# Prediction API function for 1 JSON
+import requests, sys
+
+def predict_API_call(host, headers, username, token, model_id, project_id, data, classif=True):
+    response = requests.post('%s/api/v1/%s/%s/predict' % (host, project_id, model_id),
+                            auth=(username, token), data=data, headers=headers)
+    output = response.json()
+    if classif:
+        predictions = [record['class_probabilities']['1.0'] 
+                       for record in output['predictions']]
+    else:
+        predictions = [record['prediction'] for record in output['predictions']]
+    return predictions
+  
 
 
 #make prediction for expected loss
