@@ -58,12 +58,14 @@ def getDataFrame(connection, appHandle, measures, dimensions, selections={}):
             for dim in dimensions:
                 if "qText" in elem[j].keys():
                   df.set_value(i, dim, elem[j]["qText"])
+                else:
+                  df.set_value(i, dim, None)
                 j += 1
             for meas in measures:
                 if "qNum" in elem[j].keys():
                   df.set_value(i, meas, elem[j]["qNum"])
+                else:
+                  df.set_value(i, meas, None)
                 j += 1
             
             i += 1
-
-    return df
