@@ -1,9 +1,10 @@
-import pyqlikengine.structs as structs
-from pyqlikengine.engine_communicator import *
-from pyqlikengine.engine_global_api import *
-from pyqlikengine.engine_app_api import *
-from pyqlikengine.engine_generic_object_api import *
-from pyqlikengine.engine_field_api import *
+import structs as structs
+from engine_communicator import *
+from engine_global_api import *
+from engine_app_api import *
+from engine_generic_object_api import *
+from engine_field_api import *
+import engine_field_api
 # from engine_communicator import SecureEngineCommunicator
 
 host = "cloudera.qlik.com"
