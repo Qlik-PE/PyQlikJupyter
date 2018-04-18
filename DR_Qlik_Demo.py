@@ -16,7 +16,7 @@ apps = helper.ega.get_doc_list()
 for app in apps:
     print (app['qTitle']+'-'+app['qDocId'])
 
-opened_app = helper.ega.open_doc('de1eb0ac-7c1c-406d-a9b6-4fde5d201183') ##Price Analysis
+opened_app = helper.ega.open_doc('de1eb0ac-7c1c-406d-a9b6-4fde5d201183') ##Executive Dashboard
 app_handle = helper.ega.get_handle(opened_app)
 
 
@@ -50,8 +50,6 @@ conversion_model_id = "5ad4d9a6c2674e476194eb47"
 conversion_project_id = "5ad4d933e3cd9b11099173dc"
 
 # Prediction API function for 1 JSON
-
-
 def predict_API_call(host, headers, username, token, model_id, project_id, data, classif=True):
     response = requests.post('%s/api/v1/%s/%s/predict' % (host, project_id, model_id),
                             auth=(username, token), data=data, headers=headers)
@@ -63,11 +61,11 @@ def predict_API_call(host, headers, username, token, model_id, project_id, data,
         predictions = [record['prediction'] for record in output['predictions']]
     return predictions
   
-# read prediction file and filter on top row
-test_data = pd.read_csv('test/test-data.csv', nrows=1)
-row = test_data.loc[[0]]
-row_json = row.to_json(orient='records')
-print row_json  
+## read prediction file and filter on top row
+##test_data = pd.read_csv('test/test-data.csv', nrows=1)
+#row = test_data.loc[[0]]
+#row_json = row.to_json(orient='records')
+#print row_json  
 
 
 #make prediction for expected loss
@@ -129,6 +127,6 @@ axes = fig.add_subplot(1, 1, 1, facecolor=dr_dark_blue)
 
 plt.scatter(table.price, table.profitability, color=dr_green)
 plt.plot(table.price, table.profitability, color=dr_green)
-plt.title('Profitability')
-plt.xlabel('Price (discounted vs current level)')
-plt.ylabel('Profitability')
+#plt.title('Profitability')
+#plt.xlabel('Price (discounted vs current level)')
+#plt.ylabel('Profitability')
