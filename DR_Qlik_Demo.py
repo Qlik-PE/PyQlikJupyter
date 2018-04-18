@@ -5,8 +5,6 @@ import datarobot as dr
 import json
 import pandas as pd
 import requests, sys
-
-### Instantiate PyQIX
 from pyqlikengine import instantiate_helper as helper
 
 ### Get a list of apps
