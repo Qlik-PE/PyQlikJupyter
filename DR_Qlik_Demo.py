@@ -6,6 +6,7 @@ import json
 import pandas as pd
 import requests, sys
 from pyqlikengine import instantiate_helper as helper
+from pyqlikengine import engine_helper as pyqlikhelper
 
 ### Get a list of apps
 apps = helper.ega.get_doc_list()
@@ -16,9 +17,6 @@ for app in apps:
 
 opened_app = helper.ega.open_doc('de1eb0ac-7c1c-406d-a9b6-4fde5d201183') ##Price History App
 app_handle = helper.ega.get_handle(opened_app)
-
-
-from pyqlikengine import engine_helper as pyqlikhelper
 
 dimensions =["id","Rating_Class","Sub_Rating_Class","Renewal_class","Sub_Renewal_Class","Property_size","Residents","Commercial","Norm_monthly_rent","No_claim_Years","Previous_claims","Norm_area_m","Premium_remain","Premium_renew","Renewal_Type","crime_property_type","crime_residents","crime_area","crime_arson","crime_burglary","crime_neighbour_watch","crime_community","crime_risk","Geographical_risk","Weather_risk","ISO_cat","ISO_desc","review_scores","region","last_review"]
 measures = []
