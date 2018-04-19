@@ -16,25 +16,29 @@ apps = helper.ega.get_doc_list()
 for app in apps:
     print (app['qTitle']+'-'+app['qDocId'])
 
+### Open desired app in Qlik
 opened_app = helper.ega.open_doc('de1eb0ac-7c1c-406d-a9b6-4fde5d201183') ##Price History App
 app_handle = helper.ega.get_handle(opened_app)
 
+### Build a dataframe of features from Qlik and make selection of id of interest, per end user request
 dimensions =["id","Rating_Class","Sub_Rating_Class","Renewal_class","Sub_Renewal_Class","Property_size","Residents","Commercial","Norm_monthly_rent","No_claim_Years","Previous_claims","Norm_area_m","Premium_remain","Premium_renew","Renewal_Type","crime_property_type","crime_residents","crime_area","crime_arson","crime_burglary","crime_neighbour_watch","crime_community","crime_risk","Geographical_risk","Weather_risk","ISO_cat","ISO_desc","review_scores","region","last_review"]
 measures = []
 selections = {"id": [9120]}
 df = pyqlikhelper.getDataFrame(helper.conn, app_handle, measures, dimensions, selections)
 df
 
+### Format for Datarobot friendliness
 row_json = df.to_json(orient='records')
 print row_json
 
+### Datarobot model id's
 loss_model_id = "5ad4d867c2674e17de32822a"
 loss_project_id = "5ad4d836e3cd9b0e5e90b89f"
 
 conversion_model_id = "5ad4d9a6c2674e476194eb47"
 conversion_project_id = "5ad4d933e3cd9b11099173dc"
 
-# Prediction API function for 1 JSON
+### Datarobot Prediction API function for 1 JSON
 def predict_API_call(host, headers, username, token, model_id, project_id, data, classif=True):
     response = requests.post('%s/api/v1/%s/%s/predict' % (host, project_id, model_id),
                             auth=(username, token), data=data, headers=headers)
@@ -46,19 +50,19 @@ def predict_API_call(host, headers, username, token, model_id, project_id, data,
         predictions = [record['prediction'] for record in output['predictions']]
     return predictions
 
-# Modelling API parameters
+### Modelling API parameters
 token = 'StcF5iwvv8IAjk9Mytl0e8EKkS35hWeA'
 host = 'https://qlik.orm.datarobot.com'
 username = 'chris.larsen@qlik.com'
 
 dr.Client(token=token, endpoint='%s/api/v2' % host)
 
-# Prediction API parameters
+### Prediction API parameters
 prediction_host = 'https://qlik.orm.datarobot.com'
 headers = {'Content-Type': 'application/json', 'datarobot-key': '94d2823a-cd48-8be3-03de-fd0f58515e66'}
 
 
-#make prediction for expected loss
+### Make prediction for expected loss
 output = predict_API_call(host=prediction_host, 
                          headers=headers, 
                          username=username, 
@@ -69,10 +73,10 @@ output = predict_API_call(host=prediction_host,
                          classif=False)
 print 'Expected Loss: %.3f' % output[0]
 
-# Add expected loss into the data
+### Add expected loss into the data
 row[u'predicted_loss'] = output[0]
 
-# Add price range from 80% to 120%, step 1%
+### Add price range from 80% to 120%, step 1%
 rows = pd.concat([row]*41, ignore_index=True) # duplicate the row
 rows['renewal_price'] = range(80,121)
 rows = rows[['id', 'predicted_loss', 'renewal_price', 
@@ -80,7 +84,7 @@ rows = rows[['id', 'predicted_loss', 'renewal_price',
 rows_json = rows.to_json(orient='records')
 
 
-# Generate predictions from conversion model given the range of prices
+### Generate predictions from conversion model given the range of prices
 conversions = predict_API_call(host=prediction_host, 
                          headers=headers, 
                          username=username, 
@@ -89,18 +93,19 @@ conversions = predict_API_call(host=prediction_host,
                          project_id=conversion_project_id,
                          data=rows_json)
 
+### Bring into a table for output analysis
 table = pd.DataFrame({'price': rows.renewal_price,
                       'conversion': conversions,
                       'loss': rows['predicted_loss']})
 
-# Compute optimal price
+### Compute optimal price
 table['profitability'] = table.conversion * (table.price*(table.loss*1.2) - table.loss)/100.
 best_i = table.profitability.argmax()
 print 'Optimal price: %.3f' % ((table.price.iloc[best_i] * table.loss.iloc[best_i])*1.2/100.)
 print 'Expected conversion: %.3f \n' % table.conversion.iloc[best_i]
 print table
 
-#Visualization
+### Visualization
 
 dr_green = '#03c75f'
 dr_white = '#ffffff'
