@@ -1,0 +1,18 @@
+version: '3'
+services:
+  jupyter:
+    build: pyqlikengine
+    container_name: jupyter
+    volumes:
+      - ./pyqlikengine:/home/jovyan # mount the pyqlikengine in the home dir of the jupyter data science container
+    ports:
+      - "8889:8888"
+  qlikcore_engine:
+    image: qlikcore/engine:12.160.0
+    restart: always
+    container_name: qlikcore_engine
+    command: -S DocumentDirectory=/apps -S AcceptEULA=yes
+    volumes:
+      - ~/Qlik/Sense/Apps:/apps # change ~/Qlik/Sense/Apps to whereever your apps are stored
+    ports:
+      - "9077:9076"
