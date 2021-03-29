@@ -44,7 +44,7 @@ py4j==0.10.4
 pyasn1==0.4.2
 pycparser==2.18
 pycurl==7.43.0.1
-Pygments==2.2.0
+Pygments==2.7.4
 PyJWT==1.5.3
 pyparsing==2.2.0
 python-dateutil==2.6.1
