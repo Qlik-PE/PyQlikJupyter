@@ -32,7 +32,7 @@ jsonschema==2.6.0
 kudu-python==1.2.0
 MarkupSafe==1.0
 matplotlib==2.0.0
-numpy==1.12.1
+numpy==1.21.0
 pandas==0.20.1
 pandas-datareader==0.2.1
 pathlib2==2.3.0
